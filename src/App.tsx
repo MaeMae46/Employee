@@ -119,29 +119,38 @@ const App = () => {
     }
   };
 
-  const updateEmployee = async (updatedEmployee: Employee) => {
-    try {
-      const response = await fetch(`${API_URL}/${updatedEmployee.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          FIRST_NAME: updatedEmployee.firstName,
-          LAST_NAME: updatedEmployee.lastName,
-          DEPARTMENT: updatedEmployee.department,
-          DATE_OF_BIRTH: updatedEmployee.birthdate,
-        }),
-      });
-      if (!response.ok) {
-        throw new Error("Failed to update employee");
-      }
-      showMessage("อัปเดตข้อมูลพนักงานสำเร็จ!", "success");
-      setEditingEmployee(null);
-      fetchEmployees();
-    } catch (err: any) {
-      setError("อัปเดตข้อมูลพนักงานไม่สำเร็จ. กรุณาลองใหม่อีกครั้ง.");
-      console.error("Error updating employee:", err);
+  const updateEmployee = async (
+  updatedEmployee: Employee | Omit<Employee, "id">
+) => {
+  // เช็คว่ามี id หรือไม่ (เพราะ update ต้องมี id)
+  if (!("id" in updatedEmployee)) {
+    setError("Cannot update employee without an id.");
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_URL}/${updatedEmployee.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        FIRST_NAME: updatedEmployee.firstName,
+        LAST_NAME: updatedEmployee.lastName,
+        DEPARTMENT: updatedEmployee.department,
+        DATE_OF_BIRTH: updatedEmployee.birthdate,
+      }),
+    });
+    if (!response.ok) {
+      throw new Error("Failed to update employee");
     }
-  };
+    showMessage("อัปเดตข้อมูลพนักงานสำเร็จ!", "success");
+    setEditingEmployee(null);
+    fetchEmployees();
+  } catch (err: any) {
+    setError("อัปเดตข้อมูลพนักงานไม่สำเร็จ. กรุณาลองใหม่อีกครั้ง.");
+    console.error("Error updating employee:", err);
+  }
+};
+
 
   const deleteEmployee = async (id: string) => {
     try {
